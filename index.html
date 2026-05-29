@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>高考加油 - 未来闪闪发光</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --red-deep: #5f0718;
+      --red: #d81734;
+      --rose: #ff5261;
+      --orange: #ff8a2a;
+      --gold: #ffd66b;
+      --gold-light: #fff2b8;
+      --cream: #fff9df;
+      --shadow: rgba(47, 0, 12, .46);
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      color: var(--cream);
+      font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif;
+      background: var(--red-deep);
+      touch-action: manipulation;
+    }
+
+    .page {
+      position: relative;
+      display: grid;
+      min-height: 100vh;
+      place-items: center;
+      overflow: hidden;
+      padding: max(28px, env(safe-area-inset-top)) 15px max(58px, env(safe-area-inset-bottom));
+      isolation: isolate;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255, 242, 184, .48) 0 8%, transparent 24%),
+        radial-gradient(circle at 16% 78%, rgba(255, 138, 42, .38) 0 9%, transparent 30%),
+        radial-gradient(circle at 90% 22%, rgba(255, 82, 97, .48) 0 10%, transparent 31%),
+        linear-gradient(135deg, #4e0616 0%, #990d25 33%, #e52b31 62%, #ff9f32 100%);
+    }
+
+    .page::before {
+      position: absolute;
+      inset: -45%;
+      z-index: -8;
+      content: "";
+      background:
+        conic-gradient(from 20deg at 50% 50%, transparent 0 8%, rgba(255, 214, 107, .33) 13%, transparent 21%, rgba(255, 82, 97, .34) 34%, transparent 46%, rgba(255, 242, 184, .24) 55%, transparent 66%, rgba(255, 138, 42, .33) 78%, transparent 90%);
+      filter: blur(34px);
+      animation: bgSpin 24s linear infinite;
+    }
+
+    .page::after {
+      position: absolute;
+      inset: 0;
+      z-index: -7;
+      content: "";
+      background:
+        linear-gradient(115deg, transparent 0 38%, rgba(255, 255, 255, .18) 45%, transparent 53% 100%),
+        linear-gradient(rgba(255, 242, 184, .07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 242, 184, .06) 1px, transparent 1px);
+      background-size: 220% 100%, 48px 48px, 48px 48px;
+      mask-image: radial-gradient(circle at 50% 48%, #000 0 70%, transparent 100%);
+      animation: sweepBg 5.6s ease-in-out infinite;
+    }
+
+    .layer,
+    .fx-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .layer {
+      z-index: -3;
+    }
+
+    .fx-layer {
+      z-index: 20;
+      overflow: hidden;
+    }
+
+    .glow {
+      position: absolute;
+      width: 42vmax;
+      height: 42vmax;
+      border-radius: 50%;
+      opacity: .56;
+      filter: blur(34px);
+      mix-blend-mode: screen;
+      animation: driftGlow 9s ease-in-out infinite;
+    }
+
+    .glow.a {
+      left: -18vmax;
+      top: 8vh;
+      background: #ff5261;
+    }
+
+    .glow.b {
+      right: -16vmax;
+      bottom: -8vmax;
+      background: #ffd66b;
+      animation-delay: -3s;
+    }
+
+    .glow.c {
+      left: 22vw;
+      top: -20vmax;
+      background: #ff8a2a;
+      animation-delay: -6s;
+    }
+
+    .particle,
+    .star,
+    .confetti,
+    .cloud {
+      position: absolute;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    .particle {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 242, 184, .78);
+      box-shadow: 0 0 14px rgba(255, 214, 107, .7);
+      animation: particleFloat linear infinite;
+    }
+
+    .star {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 12px 4px rgba(255, 242, 184, .48);
+      animation: starTwinkle ease-in-out infinite;
+    }
+
+    .confetti {
+      top: -30px;
+      width: 8px;
+      height: 18px;
+      border-radius: 10px 2px 10px 2px;
+      animation: confettiFall linear infinite;
+    }
+
+    .confetti.red { background: linear-gradient(#ff8b8f, #d81734); }
+    .confetti.gold { background: linear-gradient(#fff2b8, #f3aa27); }
+    .confetti.orange { background: linear-gradient(#ffc071, #ff6d1f); }
+    .confetti.pink { background: linear-gradient(#ffd2d7, #ff5261); }
+
+    .cloud {
+      width: 132px;
+      height: 44px;
+      opacity: .28;
+      filter: drop-shadow(0 0 14px rgba(255, 214, 107, .2));
+      animation: cloudMove linear infinite;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      position: absolute;
+      content: "";
+      border: 2px solid rgba(255, 242, 184, .72);
+      border-left-color: transparent;
+      border-bottom-color: transparent;
+      border-radius: 999px;
+    }
+
+    .cloud::before {
+      left: 0;
+      top: 18px;
+      width: 86px;
+      height: 24px;
+    }
+
+    .cloud::after {
+      right: 0;
+      top: 4px;
+      width: 76px;
+      height: 32px;
+    }
+
+    .ribbon {
+      position: fixed;
+      width: 190px;
+      height: 18px;
+      z-index: -1;
+      opacity: .42;
+      background: linear-gradient(90deg, transparent, rgba(255, 242, 184, .9), rgba(255, 82, 97, .65), transparent);
+      filter: blur(.2px) drop-shadow(0 0 16px rgba(255, 214, 107, .36));
+      transform-origin: center;
+      animation: ribbonWave 5s ease-in-out infinite;
+    }
+
+    .ribbon.one {
+      left: -42px;
+      top: 16vh;
+      transform: rotate(-28deg);
+    }
+
+    .ribbon.two {
+      right: -54px;
+      top: 67vh;
+      transform: rotate(28deg);
+      animation-delay: -2s;
+    }
+
+    .scene {
+      position: relative;
+      z-index: 4;
+      width: min(94vw, 820px);
+      transform-style: preserve-3d;
+      animation: sceneIn .95s cubic-bezier(.18, .9, .2, 1) both, sceneFloat 5.4s ease-in-out infinite .95s;
+    }
+
+    .halo-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: -1;
+      width: min(88vw, 760px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 242, 184, .23);
+      transform: translate(-50%, -50%);
+      box-shadow:
+        0 0 80px rgba(255, 214, 107, .25),
+        inset 0 0 80px rgba(255, 82, 97, .14);
+      animation: ringPulse 3.6s ease-in-out infinite;
+    }
+
+    .panel-stack {
+      position: relative;
+      padding: clamp(16px, 4.2vw, 32px);
+    }
+
+    .panel-stack::before,
+    .panel-stack::after {
+      position: absolute;
+      inset: clamp(16px, 4.2vw, 32px);
+      content: "";
+      border-radius: 22px;
+      pointer-events: none;
+    }
+
+    .panel-stack::before {
+      transform: translate(18px, 18px) rotate(-2.2deg);
+      background: rgba(42, 0, 12, .22);
+      filter: blur(4px);
+    }
+
+    .panel-stack::after {
+      transform: translate(9px, 10px) rotate(2.2deg);
+      border: 1px solid rgba(255, 242, 184, .32);
+      background: linear-gradient(135deg, rgba(255, 214, 107, .34), rgba(255, 82, 97, .22));
+      box-shadow: 0 24px 76px rgba(60, 0, 14, .34);
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 242, 184, .62);
+      border-radius: 22px;
+      padding: clamp(28px, 6vw, 58px) clamp(18px, 5vw, 58px);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, .05) 34%, rgba(255, 214, 107, .13)),
+        linear-gradient(160deg, rgba(104, 5, 24, .92), rgba(211, 22, 44, .86) 48%, rgba(111, 8, 26, .94));
+      box-shadow:
+        0 34px 100px var(--shadow),
+        inset 0 1px 0 rgba(255, 255, 255, .48),
+        inset 0 -24px 72px rgba(71, 0, 15, .24);
+      backdrop-filter: blur(18px);
+    }
+
+    .panel::before {
+      position: absolute;
+      inset: 13px;
+      content: "";
+      border: 1px solid rgba(255, 242, 184, .34);
+      border-radius: 18px;
+      pointer-events: none;
+    }
+
+    .panel::after {
+      position: absolute;
+      left: -45%;
+      top: -70%;
+      width: 44%;
+      height: 240%;
+      content: "";
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .30), transparent);
+      transform: rotate(20deg);
+      animation: panelSheen 4.8s ease-in-out infinite;
+    }
+
+    .badge {
+      position: relative;
+      z-index: 2;
+      width: max-content;
+      max-width: 100%;
+      margin: 0 auto 18px;
+      border: 1px solid rgba(255, 242, 184, .56);
+      border-radius: 999px;
+      padding: 9px 18px;
+      background: rgba(255, 255, 255, .13);
+      color: var(--gold-light);
+      font-size: clamp(13px, 3.4vw, 17px);
+      font-weight: 800;
+      text-align: center;
+      box-shadow: 0 10px 28px rgba(41, 0, 11, .28), inset 0 1px 0 rgba(255, 255, 255, .26);
+      animation: popIn .65s .15s both;
+    }
+
+    .title {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      min-height: clamp(118px, 24vw, 190px);
+      text-align: center;
+    }
+
+    .title h1 {
+      color: var(--gold-light);
+      font-size: clamp(58px, 16vw, 128px);
+      font-weight: 900;
+      line-height: .92;
+      letter-spacing: 0;
+      -webkit-text-stroke: clamp(1px, .35vw, 3px) rgba(123, 11, 26, .85);
+      text-shadow:
+        0 3px 0 #ffb52d,
+        0 0 16px rgba(255, 242, 184, .96),
+        0 0 36px rgba(255, 185, 51, .78),
+        0 18px 34px rgba(52, 0, 12, .54);
+      animation: titleBounce 1.05s cubic-bezier(.2, 1.5, .28, 1) .28s both, titleGlow 2.1s ease-in-out infinite 1.2s;
+    }
+
+    .title .shine-word {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: transparent;
+      font-size: clamp(58px, 16vw, 128px);
+      font-weight: 900;
+      line-height: .92;
+      -webkit-text-stroke: 1px transparent;
+      background: linear-gradient(95deg, transparent 0 38%, #fff 47%, transparent 56% 100%);
+      background-size: 240% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: titleSweep 2.8s ease-in-out infinite 1.4s;
+      pointer-events: none;
+    }
+
+    .subline {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 8px auto 22px;
+    }
+
+    .tag {
+      min-width: 112px;
+      border: 1px solid rgba(255, 242, 184, .5);
+      border-radius: 999px;
+      padding: 10px 13px;
+      background: linear-gradient(135deg, rgba(255, 242, 184, .26), rgba(255, 255, 255, .08));
+      color: #fff7cf;
+      font-size: clamp(15px, 3.8vw, 20px);
+      font-weight: 900;
+      text-align: center;
+      text-shadow: 0 0 14px rgba(255, 242, 184, .55);
+      box-shadow: 0 12px 30px rgba(51, 0, 14, .22);
+      animation: tagIn .68s both, tagFloat 2.9s ease-in-out infinite;
+    }
+
+    .tag:nth-child(1) { animation-delay: .52s, 1.1s; }
+    .tag:nth-child(2) { animation-delay: .64s, 1.24s; }
+    .tag:nth-child(3) { animation-delay: .76s, 1.38s; }
+
+    .message {
+      position: relative;
+      z-index: 2;
+      margin: 0 auto;
+      max-width: 650px;
+      border: 1px solid rgba(255, 242, 184, .42);
+      border-radius: 18px;
+      padding: clamp(18px, 4.8vw, 26px);
+      background: rgba(255, 255, 255, .12);
+      color: #fffbed;
+      font-size: clamp(17px, 4.4vw, 24px);
+      font-weight: 800;
+      line-height: 1.8;
+      text-align: center;
+      box-shadow:
+        0 20px 52px rgba(45, 0, 12, .24),
+        inset 0 1px 0 rgba(255, 255, 255, .24);
+      animation: fadeUp .78s .86s both;
+    }
+
+    .message strong {
+      color: var(--gold-light);
+      text-shadow: 0 0 18px rgba(255, 214, 107, .62);
+    }
+
+    .future {
+      position: relative;
+      z-index: 2;
+      margin-top: 18px;
+      color: var(--gold-light);
+      font-size: clamp(22px, 6vw, 40px);
+      font-weight: 900;
+      line-height: 1.32;
+      text-align: center;
+      -webkit-text-stroke: 1px rgba(113, 10, 25, .58);
+      text-shadow:
+        0 0 16px rgba(255, 242, 184, .76),
+        0 0 32px rgba(255, 138, 42, .66),
+        0 9px 20px rgba(50, 0, 12, .38);
+      animation: fadeUp .78s 1.04s both, futurePulse 2.6s ease-in-out infinite 1.5s;
+    }
+
+    .ticker {
+      position: fixed;
+      left: 0;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      z-index: 9;
+      width: 100%;
+      overflow: hidden;
+      border-block: 1px solid rgba(255, 242, 184, .26);
+      background: rgba(72, 0, 17, .34);
+      box-shadow: 0 -10px 32px rgba(45, 0, 12, .16);
+      backdrop-filter: blur(12px);
+    }
+
+    .ticker-track {
+      display: flex;
+      width: max-content;
+      animation: tickerMove 28s linear infinite;
+    }
+
+    .ticker span {
+      padding: 11px 26px;
+      color: #fff7cf;
+      white-space: nowrap;
+      font-size: clamp(13px, 3.4vw, 17px);
+      font-weight: 700;
+      text-shadow: 0 0 12px rgba(255, 214, 107, .5);
+    }
+
+    .tap-tip {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      left: 50%;
+      z-index: 10;
+      transform: translateX(-50%);
+      border: 1px solid rgba(255, 242, 184, .36);
+      border-radius: 999px;
+      padding: 8px 14px;
+      background: rgba(75, 0, 17, .28);
+      color: rgba(255, 249, 223, .9);
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 12px 32px rgba(42, 0, 12, .18);
+      backdrop-filter: blur(12px);
+      animation: tipPulse 2.4s ease-in-out infinite;
+    }
+
+    .spark {
+      position: fixed;
+      z-index: 22;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: var(--gold-light);
+      box-shadow: 0 0 14px 4px rgba(255, 214, 107, .76);
+      animation: firework .78s ease-out forwards;
+    }
+
+    .heart {
+      position: fixed;
+      z-index: 21;
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+      background: #ff6d87;
+      filter: drop-shadow(0 0 13px rgba(255, 242, 184, .78));
+      transform: translate(-50%, -50%) rotate(45deg);
+      animation: heartRise 1.16s ease-out forwards;
+    }
+
+    .heart::before,
+    .heart::after {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      content: "";
+      border-radius: 50%;
+      background: inherit;
+    }
+
+    .heart::before {
+      left: -9px;
+      top: 0;
+    }
+
+    .heart::after {
+      left: 0;
+      top: -9px;
+    }
+
+    @keyframes bgSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes sweepBg {
+      0%, 45% { background-position: 180% 0, 0 0, 0 0; }
+      100% { background-position: -80% 0, 0 0, 0 0; }
+    }
+
+    @keyframes driftGlow {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(5vw, -4vh, 0) scale(1.08); }
+    }
+
+    @keyframes particleFloat {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 105vh, 0) scale(.7);
+      }
+      12%, 82% { opacity: .85; }
+      to {
+        opacity: 0;
+        transform: translate3d(var(--drift), -16vh, 0) scale(1.18);
+      }
+    }
+
+    @keyframes starTwinkle {
+      0%, 100% { opacity: .22; transform: scale(.72); }
+      50% { opacity: 1; transform: scale(1.38); }
+    }
+
+    @keyframes confettiFall {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, -40px, 0) rotate(0deg);
+      }
+      9%, 80% { opacity: .88; }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--drift), 112vh, 0) rotate(420deg);
+      }
+    }
+
+    @keyframes cloudMove {
+      from { transform: translateX(-170px) scale(var(--scale)); }
+      to { transform: translateX(calc(100vw + 180px)) scale(var(--scale)); }
+    }
+
+    @keyframes ribbonWave {
+      0%, 100% { filter: blur(.2px) drop-shadow(0 0 16px rgba(255, 214, 107, .36)); }
+      50% { filter: blur(1px) drop-shadow(0 0 25px rgba(255, 242, 184, .6)); }
+    }
+
+    @keyframes sceneIn {
+      from { opacity: 0; transform: translateY(28px) scale(.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes sceneFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes ringPulse {
+      0%, 100% { opacity: .68; transform: translate(-50%, -50%) scale(.98); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+    }
+
+    @keyframes panelSheen {
+      0%, 48% { transform: translateX(0) rotate(20deg); }
+      100% { transform: translateX(340%) rotate(20deg); }
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(14px) scale(.86); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes titleBounce {
+      0% { opacity: 0; transform: translateY(36px) scale(.72); }
+      62% { opacity: 1; transform: translateY(-10px) scale(1.08); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes titleGlow {
+      0%, 100% { filter: brightness(1); transform: translateY(0) scale(1); }
+      50% { filter: brightness(1.2); transform: translateY(-3px) scale(1.025); }
+    }
+
+    @keyframes titleSweep {
+      0%, 45% { background-position: 170% 0; opacity: .2; }
+      60% { opacity: .85; }
+      100% { background-position: -80% 0; opacity: .2; }
+    }
+
+    @keyframes tagIn {
+      from { opacity: 0; transform: translateY(18px) scale(.88); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes tagFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes futurePulse {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.035); filter: brightness(1.18); }
+    }
+
+    @keyframes tickerMove {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    @keyframes tipPulse {
+      0%, 100% { opacity: .66; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes firework {
+      from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(.25);
+      }
+    }
+
+    @keyframes heartRise {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(45deg) scale(.45);
+      }
+      72% { opacity: .92; }
+      100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--heart-x)), calc(-50% - 108px)) rotate(45deg) scale(1.75);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        place-items: start center;
+        padding-top: max(54px, env(safe-area-inset-top));
+      }
+
+      .scene {
+        width: min(100%, 450px);
+      }
+
+      .panel-stack {
+        padding: 12px;
+      }
+
+      .panel-stack::before,
+      .panel-stack::after {
+        inset: 12px;
+        border-radius: 18px;
+      }
+
+      .panel {
+        border-radius: 18px;
+        padding-top: 34px;
+        padding-bottom: 32px;
+      }
+
+      .panel::before {
+        border-radius: 14px;
+      }
+
+      .subline {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .tag {
+        min-width: 0;
+      }
+
+      .ticker span {
+        padding-inline: 20px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .panel {
+        padding-inline: 14px;
+      }
+
+      .title {
+        min-height: 104px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page" id="page">
+    <div class="layer" aria-hidden="true">
+      <span class="glow a"></span>
+      <span class="glow b"></span>
+      <span class="glow c"></span>
+      <span class="ribbon one"></span>
+      <span class="ribbon two"></span>
+    </div>
+
+    <div class="layer" id="decor" aria-hidden="true"></div>
+    <div class="fx-layer" id="effects" aria-hidden="true"></div>
+    <div class="tap-tip">点击屏幕放礼花</div>
+
+    <section class="scene" aria-label="高考祝福">
+      <div class="halo-ring" aria-hidden="true"></div>
+      <div class="panel-stack">
+        <div class="panel">
+          <div class="badge">愿所有努力都被看见</div>
+
+          <div class="title">
+            <h1>高考加油</h1>
+            <div class="shine-word">高考加油</div>
+          </div>
+
+          <div class="subline">
+            <div class="tag">全力以赴</div>
+            <div class="tag">顶峰相见</div>
+            <div class="tag">金榜题名</div>
+          </div>
+
+          <p class="message">
+            愿你带着沉着与热爱走进考场，笔下有锋芒，心中有星河。<br>
+            <strong>放平心态，发挥出自己的实力就好。</strong>
+          </p>
+
+          <p class="future">乘风好去，长空万里，直下看山河</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <span>高考顺利，提笔从容，落笔生花。</span>
+        <span>全力以赴，顶峰相见，未来闪闪发光。</span>
+        <span>数年寒窗终有回响，愿你不负热爱，不负努力。</span>
+        <span>乘风好去，长空万里，直下看山河。</span>
+        <span>高考顺利，提笔从容，落笔生花。</span>
+        <span>全力以赴，顶峰相见，未来闪闪发光。</span>
+        <span>数年寒窗终有回响，愿你不负热爱，不负努力。</span>
+        <span>乘风好去，长空万里，直下看山河。</span>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var decor = document.getElementById("decor");
+      var effects = document.getElementById("effects");
+      var confettiColors = ["red", "gold", "orange", "pink"];
+      var sparkColors = ["#fff2b8", "#ffd66b", "#ff8a2a", "#ff5261", "#ffffff"];
+
+      function random(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function addParticles() {
+        for (var i = 0; i < 44; i += 1) {
+          var dot = document.createElement("span");
+          var size = random(3, 8);
+          dot.className = "particle";
+          dot.style.left = random(0, 100) + "vw";
+          dot.style.width = size + "px";
+          dot.style.height = size + "px";
+          dot.style.setProperty("--drift", random(-80, 80) + "px");
+          dot.style.animationDuration = random(8, 17) + "s";
+          dot.style.animationDelay = random(-17, 0) + "s";
+          decor.appendChild(dot);
+        }
+      }
+
+      function addStars() {
+        for (var i = 0; i < 52; i += 1) {
+          var star = document.createElement("span");
+          var size = random(2, 5);
+          star.className = "star";
+          star.style.left = random(2, 98) + "vw";
+          star.style.top = random(4, 96) + "vh";
+          star.style.width = size + "px";
+          star.style.height = size + "px";
+          star.style.animationDuration = random(1.2, 2.9) + "s";
+          star.style.animationDelay = random(-2.9, 0) + "s";
+          decor.appendChild(star);
+        }
+      }
+
+      function addConfetti() {
+        for (var i = 0; i < 34; i += 1) {
+          var item = document.createElement("span");
+          item.className = "confetti " + confettiColors[i % confettiColors.length];
+          item.style.left = random(0, 100) + "vw";
+          item.style.setProperty("--drift", random(-95, 95) + "px");
+          item.style.animationDuration = random(8, 16) + "s";
+          item.style.animationDelay = random(-16, 0) + "s";
+          decor.appendChild(item);
+        }
+      }
+
+      function addClouds() {
+        for (var i = 0; i < 5; i += 1) {
+          var cloud = document.createElement("span");
+          cloud.className = "cloud";
+          cloud.style.top = random(12, 82) + "vh";
+          cloud.style.setProperty("--scale", random(.7, 1.35));
+          cloud.style.animationDuration = random(22, 38) + "s";
+          cloud.style.animationDelay = random(-28, 0) + "s";
+          decor.appendChild(cloud);
+        }
+      }
+
+      function createSpark(x, y, angle, distance) {
+        var spark = document.createElement("span");
+        var radians = angle * Math.PI / 180;
+        spark.className = "spark";
+        spark.style.left = x + "px";
+        spark.style.top = y + "px";
+        spark.style.background = sparkColors[Math.floor(random(0, sparkColors.length))];
+        spark.style.setProperty("--x", Math.cos(radians) * distance + "px");
+        spark.style.setProperty("--y", Math.sin(radians) * distance + "px");
+        effects.appendChild(spark);
+        window.setTimeout(function () {
+          spark.remove();
+        }, 850);
+      }
+
+      function createHeart(x, y) {
+        var heart = document.createElement("span");
+        heart.className = "heart";
+        heart.style.left = x + "px";
+        heart.style.top = y + "px";
+        heart.style.setProperty("--heart-x", random(-42, 42) + "px");
+        effects.appendChild(heart);
+        window.setTimeout(function () {
+          heart.remove();
+        }, 1250);
+      }
+
+      function burst(x, y) {
+        for (var i = 0; i < 28; i += 1) {
+          createSpark(x, y, (360 / 28) * i + random(-8, 8), random(42, 118));
+        }
+        createHeart(x - 22, y + 12);
+        window.setTimeout(function () {
+          createHeart(x + 20, y + 8);
+        }, 90);
+      }
+
+      function handlePointer(event) {
+        burst(event.clientX, event.clientY);
+      }
+
+      addParticles();
+      addStars();
+      addConfetti();
+      addClouds();
+      document.addEventListener("pointerdown", handlePointer, { passive: true });
+    }());
+  </script>
+</body>
+</html>
